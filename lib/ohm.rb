@@ -110,6 +110,10 @@ module Ohm
     @redis = redis
   end
 
+  def self.redis_sha
+    @redis_sha
+  end
+
   def self.redis_sha=(redis_sha)
     @redis_sha = redis_sha
   end
