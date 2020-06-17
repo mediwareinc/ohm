@@ -18,6 +18,7 @@ $VERBOSE = true
 require_relative "../lib/ohm"
 
 Ohm.redis = Redic.new("redis://127.0.0.1:6379")
+Ohm.redis_sha = "test"
 
 prepare do
   Ohm.redis.call("FLUSHALL")
