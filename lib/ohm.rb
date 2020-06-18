@@ -110,6 +110,14 @@ module Ohm
     @redis = redis
   end
 
+  def self.redis_sha
+    @redis_sha
+  end
+
+  def self.redis_sha=(redis_sha)
+    @redis_sha = redis_sha
+  end
+
   # Wrapper for Ohm.redis.call("FLUSHDB").
   def self.flush
     redis.call("FLUSHDB")
@@ -325,6 +333,10 @@ module Ohm
     def redis
       model.redis
     end
+
+    def redis_sha
+      model.redis_sha
+    end
   end
 
   class Set
@@ -377,7 +389,7 @@ module Ohm
     #
     def ids
       if Array === key
-        Stal.solve(redis, key)
+        Stal.solve(redis, redis_sha, key)
       else
         key.call("SMEMBERS")
       end
@@ -387,7 +399,7 @@ module Ohm
     def size
       #redis.call("SINTER", *key).count
       #nest[:all].call("SCARD")
-      Stal.solve(redis, ["SCARD", key])
+      Stal.solve(redis, redis_sha, ["SCARD", key])
     end
 
     # Returns +true+ if +id+ is included in the set. Otherwise, returns +false+.
@@ -409,7 +421,7 @@ module Ohm
     #   user.posts.exists?(post.id)       # => true
     #
     def exists?(id)
-      Stal.solve(redis, ["SISMEMBER", key, id]) == 1
+      Stal.solve(redis, redis_sha, ["SISMEMBER", key, id]) == 1
       #nest[:all].call("SISMEMBER", id)
     end
 
@@ -460,9 +472,9 @@ module Ohm
       if options.has_key?(:get)
         options[:get] = to_key(options[:get])
 
-        Stal.solve(redis, ["SORT", key, *Utils.sort_options(options)])
+        Stal.solve(redis, redis_sha, ["SORT", key, *Utils.sort_options(options)])
       else
-        fetch(Stal.solve(redis, ["SORT", key, *Utils.sort_options(options)]))
+        fetch(Stal.solve(redis, redis_sha, ["SORT", key, *Utils.sort_options(options)]))
       end
     end
 
@@ -593,6 +605,10 @@ module Ohm
     def redis
       model.redis
     end
+
+    def redis_sha
+      model.redis_sha
+    end
   end
 
   class MutableSet < Set
@@ -710,6 +726,14 @@ module Ohm
 
     def self.redis
       defined?(@redis) ? @redis : Ohm.redis
+    end
+
+    def self.redis_sha=(redis_sha)
+      @redis_sha = redis_sha
+    end
+
+    def self.redis_sha
+      defined?(@redis_sha) ? @redis_sha : Ohm.redis_sha
     end
 
     def self.mutex
@@ -1539,6 +1563,10 @@ module Ohm
 
     def redis
       model.redis
+    end
+
+    def redis_sha
+      model.redis_sha
     end
 
     def _sanitized_attributes
